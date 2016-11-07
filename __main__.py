@@ -35,32 +35,22 @@ def check_pairs(L, S):
     return True
 
 
-def all_elements_are_unique(S):
-    indeces = []
-    for station in S:
-        indeces.append(station.index)
-    if len(indeces) == len(set(indeces)):
-        return True
-    return False
-
-
 def bruteforce(G, L):
     m = len(G[0].trains)
     for k in range(2, len(G) + 1):
-        subsets = itertools.product(G, repeat=k)
+        subsets = itertools.combinations(G, k)
         for S in subsets:
-            if all_elements_are_unique(S):
-                all_connected = True
-                for j in range(m):
-                    connected = False
-                    for station in S:
-                        if station.trains[j] == 1:
-                            connected = True
-                    if not connected:
-                        all_connected = False
-                if all_connected:
-                    if check_pairs(L, S):
-                        return S
+            all_connected = True
+            for j in range(m):
+                connected = False
+                for station in S:
+                    if station.trains[j] == 1:
+                        connected = True
+                if not connected:
+                    all_connected = False
+            if all_connected:
+                if check_pairs(L, S):
+                    return S
     return []
 
 
