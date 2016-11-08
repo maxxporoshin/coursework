@@ -35,16 +35,15 @@ def check_solvability_conditions(G, L):
 def find_essential_subset(G):
     n = len(G)
     m = len(G[0])
-    essentials = []
+    essentials = set()
     for j in range(m):
         stations = []
         for i in range(n):
             if G[i][j] == 1:
                 stations.append(i)
         if len(stations) == 1:
-            if stations[0] not in essentials:
-                essentials.append(stations[0])
-    return essentials
+                essentials.add(stations[0])
+    return list(essentials)
 
 
 def check_subset(S, G, L):
@@ -81,7 +80,7 @@ def improved_bruteforce(G, L):
     if not check_pairs(L, essentials):
         return []
     if check_subset(essentials, G, L):
-        return essentials
+        return list(essentials)
     remaining = [i for i in range(n) if i not in essentials]
     for k in range(1, len(remaining) + 1):
         subsets = itertools.combinations(remaining, k)
@@ -91,6 +90,33 @@ def improved_bruteforce(G, L):
             if check_subset(S, G, L):
                 return S
     return []
+
+
+def greedy(G, L):
+    n = len(G)
+    m = len(G[0])
+    stations = [0 for i in range(n)]
+    trains = [False for j in range(m)]
+    for j in range(m):
+        for i in range(n):
+            stations[i] += G[i][j]
+    stations.sort(reverse=True)
+    result = set()
+    for i in stations:
+        if False not in trains:
+            return list(result)
+        if not check_pairs(L, list(result) + [i]):
+            continue
+        all_trains_included = True
+        for j in range(m):
+            if G[i][j] == 1 and not trains[j]:
+                all_trains_included = False
+        if all_trains_included:
+            continue
+        for j in range(m):
+            if G[i][j] == 1:
+                trains[j] = True
+                result.add(i)
 
 
 def generate_and_solve_problem(n, m, p, l_amount):
@@ -104,6 +130,8 @@ def generate_and_solve_problem(n, m, p, l_amount):
     print(bruteforce(G, L))
     print('Improved bruteforce:')
     print(improved_bruteforce(G, L))
+    print('Greedy:')
+    print(greedy(G, L))
 
 
 generate_and_solve_problem(3, 5, 0.5, 1)
