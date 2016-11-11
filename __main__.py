@@ -1,5 +1,7 @@
 import random
 import itertools
+import time
+import math
 
 
 def generate_graph(n, m, p):
@@ -95,16 +97,14 @@ def improved_bruteforce(G, L):
 def greedy(G, L):
     n = len(G)
     m = len(G[0])
-    stations = [0 for i in range(n)]
+    stations = [[i, 0] for i in range(n)]
     trains = [False for j in range(m)]
     for j in range(m):
         for i in range(n):
-            stations[i] += G[i][j]
-    stations.sort(reverse=True)
+            stations[i][1] += G[i][j]
+    stations.sort(key=lambda x: x[1], reverse=True)
     result = set()
-    for i in stations:
-        if False not in trains:
-            return list(result)
+    for i, v in stations:
         if not check_pairs(L, list(result) + [i]):
             continue
         all_trains_included = True
@@ -117,6 +117,9 @@ def greedy(G, L):
             if G[i][j] == 1:
                 trains[j] = True
                 result.add(i)
+        if False not in trains:
+            return list(result)
+    return []
 
 
 def generate_and_solve_problem(n, m, p, l_amount):
@@ -127,11 +130,17 @@ def generate_and_solve_problem(n, m, p, l_amount):
     print('L:')
     print(L)
     print('Bruteforce:')
+    t = time.time()
     print(bruteforce(G, L))
+    print('{0:e}'.format(time.time() - t))
     print('Improved bruteforce:')
+    t = time.time()
     print(improved_bruteforce(G, L))
+    print('{0:e}'.format(time.time() - t))
     print('Greedy:')
+    t = time.time()
     print(greedy(G, L))
+    print('{0:e}'.format(time.time() - t))
 
 
-generate_and_solve_problem(3, 5, 0.5, 1)
+generate_and_solve_problem(10, 20, 0.5, 3)
