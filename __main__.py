@@ -34,20 +34,6 @@ def check_solvability_conditions(G, L):
     return True
 
 
-def find_essential_subset(G):
-    n = len(G)
-    m = len(G[0])
-    essentials = set()
-    for j in range(m):
-        stations = []
-        for i in range(n):
-            if G[i][j] == 1:
-                stations.append(i)
-        if len(stations) == 1:
-                essentials.add(stations[0])
-    return list(essentials)
-
-
 def check_subset(S, G, L=[]):
     if L and not check_pairs(L, S):
         return False
@@ -72,26 +58,6 @@ def bruteforce(G, L):
         for S in subsets:
             if check_subset(S, G, L):
                 return list(S)
-    return []
-
-
-def improved_bruteforce(G, L):
-    n = len(G)
-    if not check_solvability_conditions(G, L):
-        return []
-    essentials = find_essential_subset(G)
-    if not check_pairs(L, essentials):
-        return []
-    if check_subset(essentials, G, L):
-        return list(essentials)
-    remaining = [i for i in range(n) if i not in essentials]
-    for k in range(1, len(remaining) + 1):
-        subsets = itertools.combinations(remaining, k)
-        for subset in subsets:
-            S = list(subset)
-            S.extend(essentials)
-            if check_subset(S, G, L):
-                return S
     return []
 
 
@@ -210,10 +176,6 @@ def generate_and_solve_problem(n, m, p, l_amount):
     print('Bruteforce:')
     t = time.time()
     print(bruteforce(G, L))
-    print('{0:e}'.format(time.time() - t))
-    print('Improved bruteforce:')
-    t = time.time()
-    print(improved_bruteforce(G, L))
     print('{0:e}'.format(time.time() - t))
     print('Greedy:')
     t = time.time()
