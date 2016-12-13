@@ -21,17 +21,18 @@ def check_pairs(L, S):
     return True
 
 
-def check_solvability_conditions(G, L):
+def there_are_ghost_trains(G):
     n = len(G)
     m = len(G[0])
     for j in range(m):
-        stations = []
+        ghost = True
         for i in range(n):
             if G[i][j] == 1:
-                stations.append(i)
-        if len(stations) == 0:
-            return False
-    return True
+                ghost = False
+                break
+        if ghost:
+            return True
+    return False
 
 
 def check_subset(S, G, L=[]):
@@ -115,7 +116,7 @@ def local_search(S, G, L):
         new_T = replace_2_vertices_with_1(T, G, L) if new_T == T else new_T
         T = new_T
         iterations += 1
-    print('Iterations:', iterations)
+    # print('Iterations:', iterations)
     return T
 
 
@@ -160,36 +161,82 @@ def simulated_annealing(S, G, L, p1, p2):
                     T = new_T
                     iterations += 1
                     continue
-            print('Iterations: ' + str(iterations))
+            # print('Iterations: ' + str(iterations))
             return T
         T = new_T
         iterations += 1
 
 
-def generate_and_solve_problem(n, m, p, l_amount):
-    G = generate_graph(n, m, p)
-    L = generate_pairs(l_amount, n)
-    print('G:')
-    print(G)
-    print('L:')
-    print(L)
-    print('Bruteforce:')
-    t = time.time()
-    print(bruteforce(G, L))
-    print('{0:e}'.format(time.time() - t))
-    print('Greedy:')
-    t = time.time()
-    greedy_solution = greedy(G, L)
-    print(greedy_solution)
-    print('{0:e}'.format(time.time() - t))
-    print('Local search:')
-    t = time.time()
-    print(local_search(greedy_solution, G, L))
-    print('{0:e}'.format(time.time() - t))
-    print('Simulated annealing:')
-    t = time.time()
-    print(simulated_annealing(greedy_solution, G, L, 0.5, 0.5))
-    print('{0:e}'.format(time.time() - t))
+# def generate_and_solve_problem(n, m, p, l_amount):
+#     G = generate_graph(n, m, p)
+#     L = generate_pairs(l_amount, n)
+#     print('G:')
+#     print(G)
+#     print('L:')
+#     print(L)
+#     print('Bruteforce:')
+#     t = time.time()
+#     print(bruteforce(G, L))
+#     print('{0:e}'.format(time.time() - t))
+#     print('Greedy:')
+#     t = time.time()
+#     greedy_solution = greedy(G, L)
+#     print(greedy_solution)
+#     print('{0:e}'.format(time.time() - t))
+#     print('Local search:')
+#     t = time.time()
+#     print(local_search(greedy_solution, G, L))
+#     print('{0:e}'.format(time.time() - t))
+#     print('Simulated annealing:')
+#     t = time.time()
+#     print(simulated_annealing(greedy_solution, G, L, 0.5, 0.5))
+#     print('{0:e}'.format(time.time() - t))
 
 
-generate_and_solve_problem(50, 500, 0.7, 10)
+def generate_and_solve_problem(n, m, p, l_amount, iters):
+    brute = open('brute.txt', 'w')
+    greed = open('greed.txt', 'w')
+    local = open('local.txt', 'w')
+    annealing = open('annealing.txt', 'w')
+    brute_t = open('brute_t.txt', 'w')
+    greed_t = open('greed_t.txt', 'w')
+    local_t = open('local_t.txt', 'w')
+    annealing_t = open('annealing_t.txt', 'w')
+    i = iters
+    while i != 0:
+        G = generate_graph(n, m, p)
+        if there_are_ghost_trains(G):
+            print('ghost')
+            continue
+        L = generate_pairs(l_amount, n)
+        print('Iteration ' + str(iters - i))
+        t = time.time()
+        brute.write(str(len(bruteforce(G, L))) + '\n')
+        brute_t.write('{:2f}'.format(time.time() - t) + '\n')
+        print('|', end='')
+        t = time.time()
+        greedy_solution = greedy(G, L)
+        greed.write(str(len(greedy_solution)) + '\n')
+        greed_t.write('{:2f}'.format(time.time() - t) + '\n')
+        print('|', end='')
+        t = time.time()
+        local.write(str(len(local_search(greedy_solution, G, L))) + '\n')
+        local_t.write('{:2f}'.format(time.time() - t) + '\n')
+        print('|', end='')
+        t = time.time()
+        annealing.write(str(len(simulated_annealing(greedy_solution, G, L, 0.5, 0.5))) + '\n')
+        annealing_t.write('{:2f}'.format(time.time() - t) + '\n')
+        print('|', end='')
+        print()
+        i -= 1
+    brute.close()
+    brute_t.close()
+    greed.close()
+    greed_t.close()
+    local.close()
+    local_t.close()
+    annealing.close()
+    annealing_t.close()
+
+
+generate_and_solve_problem(25, 100, 0.25, 10, 10)
